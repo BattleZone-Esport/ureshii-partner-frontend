@@ -49,19 +49,17 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 271 91% 65%;
   }
-}
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  
   html {
-    @apply scroll-smooth;
+    scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-surface-base text-foreground font-sans antialiased;
+    background-color: rgb(15 23 42);
+    color: rgb(241 245 249);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -69,11 +67,11 @@
 @layer components {
   /* Gradient backgrounds */
   .bg-gradient-primary {
-    @apply bg-gradient-to-r from-primary-600 via-primary-500 to-accent-purple;
+    background: linear-gradient(to right, rgb(124 58 237), rgb(168 85 247), rgb(139 92 246));
   }
   
   .bg-gradient-dark {
-    @apply bg-gradient-to-br from-surface-base via-surface-elevated to-surface-overlay;
+    background: linear-gradient(to bottom right, rgb(15 23 42), rgb(30 41 59), rgb(51 65 85));
   }
   
   .bg-gradient-mesh {
@@ -89,16 +87,25 @@
   
   /* Glass morphism */
   .glass {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .glass-dark {
-    @apply backdrop-blur-xl bg-black/20 border border-white/10;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   /* Text gradients */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary-400 via-accent-purple to-accent-pink bg-clip-text text-transparent;
+    background: linear-gradient(to right, rgb(167 139 250), rgb(139 92 246), rgb(236 72 153));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   
   /* Custom scrollbar */
@@ -108,11 +115,17 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-surface-elevated rounded-lg;
+    background: rgb(30 41 59);
+    border-radius: 0.5rem;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-surface-overlay rounded-lg hover:bg-surface-border transition-colors;
+    background: rgb(51 65 85);
+    border-radius: 0.5rem;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgb(71 85 105);
   }
   
   /* Animations */
@@ -122,6 +135,28 @@
   
   .animate-out {
     animation: slideDown 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
@@ -137,12 +172,14 @@
   }
   
   /* Focus styles */
-  .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-base;
+  .focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(15 23 42), 0 0 0 4px rgb(168 85 247);
   }
   
   /* Selection styles */
   ::selection {
-    @apply bg-primary-500/30 text-primary-100;
+    background-color: rgba(168, 85, 247, 0.3);
+    color: rgb(199 210 254);
   }
 }
