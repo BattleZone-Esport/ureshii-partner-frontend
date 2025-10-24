@@ -28,10 +28,14 @@ const GuestChatModal = ({ isOpen, onClose, initialPrompt }) => {
   const loadGuestStatus = async () => {
     try {
       const status = await chatApi.getGuestStatus();
-      setRemainingMessages(status.remaining_messages);
+      setRemainingMessages(status.remaining_messages || GUEST_MESSAGE_LIMIT);
       setLimitReached(status.remaining_messages === 0);
     } catch (error) {
       console.error('Failed to load guest status:', error);
+      toast.error('Failed to load guest chat status');
+      // Set default values
+      setRemainingMessages(GUEST_MESSAGE_LIMIT);
+      setLimitReached(false);
     }
   };
 

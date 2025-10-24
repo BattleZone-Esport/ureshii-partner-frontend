@@ -8,6 +8,7 @@ import PersonasSection from '../components/landing/PersonasSection';
 import FeaturesGrid from '../components/landing/FeaturesGrid';
 import Footer from '../components/landing/Footer';
 import GuestChatModal from '../components/landing/GuestChatModal';
+import { appApi } from '../api/app';
 import { QUICK_ACTIONS } from '../utils/constants';
 
 const Landing = () => {
@@ -15,6 +16,28 @@ const Landing = () => {
   const { isAuthenticated, loading } = useAuth();
   const [selectedAction, setSelectedAction] = useState(null);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [quickActions, setQuickActions] = useState([]);
+
+  const allActions = [
+    ...QUICK_ACTIONS.BUILD,
+    ...QUICK_ACTIONS.LEARN,
+    ...QUICK_ACTIONS.AUTOMATE,
+    ...QUICK_ACTIONS.DEBUG,
+  ];
+
+  useEffect(() => {
+    const loadQuickActions = async () => {
+      try {
+        const actions = await appApi.getQuickActions();
+        setQuickActions(actions);
+      } catch (error) {
+        console.error('Failed to load quick actions:', error);
+        // Fallback to hardcoded actions
+        setQuickActions(allActions);
+      }
+    };
+    loadQuickActions();
+  }, []);
 
   // Redirect to dashboard if already authenticated
   useEffect(() => {
@@ -34,13 +57,6 @@ const Landing = () => {
     }
   };
 
-  const allActions = [
-    ...QUICK_ACTIONS.BUILD,
-    ...QUICK_ACTIONS.LEARN,
-    ...QUICK_ACTIONS.AUTOMATE,
-    ...QUICK_ACTIONS.DEBUG,
-  ];
-
   return (
     <div className="min-h-screen bg-surface-base">
       {/* Background gradient mesh */}
@@ -56,7 +72,7 @@ const Landing = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <QuickActions
-            actions={allActions}
+            actions={quickActions}
             onActionClick={handleActionClick}
           />
         </motion.div>

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ModelsProvider } from './contexts/ModelsContext';
 import { ROUTES } from './utils/constants';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -21,10 +22,11 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <Suspense fallback={<LoadingSpinner fullScreen />}>
-            <Routes>
-              {/* Public routes */}
+        <ModelsProvider>
+          <Router>
+            <Suspense fallback={<LoadingSpinner fullScreen />}>
+              <Routes>
+                {/* Public routes */}
               <Route path={ROUTES.HOME} element={<Landing />} />
 
               {/* Protected routes with dashboard layout */}
@@ -74,6 +76,7 @@ function App() {
             }}
           />
         </Router>
+        </ModelsProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -28,7 +28,26 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      // Try to get user from localStorage first (for faster initial load)
+      // **TEST MODE BYPASS**
+      if (import.meta.env.VITE_TEST_MODE === 'true') {
+        console.log('🧪 TEST MODE: Using mock authentication');
+        const mockUser = {
+          id: 'test-user-123',
+          email: 'test@example.com',
+          name: 'Test User',
+          full_name: 'Test User',
+          avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test',
+          provider: 'google',
+          created_at: new Date().toISOString(),
+        };
+        setUser(mockUser);
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mockUser));
+        setCsrfToken('test-csrf-token');
+        setLoading(false);
+        return;
+      }
+
+      // Try to get user from localStorage first
       const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
       if (storedUser) {
         setUser(JSON.parse(storedUser));
@@ -48,7 +67,6 @@ export const AuthProvider = ({ children }) => {
       setCsrfToken(null);
       localStorage.removeItem(STORAGE_KEYS.USER);
       
-      // Only set error if it's not a 401 (which means user is not logged in)
       if (error.response?.status !== 401) {
         setError(error.message);
       }

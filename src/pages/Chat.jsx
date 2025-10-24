@@ -19,11 +19,12 @@ import {
   EyeOff
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useModels } from '../contexts/ModelsContext';
 import { chatApi } from '../api/chat';
 import { userApi } from '../api/user';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { AI_MODELS, MESSAGE_CHAR_LIMIT } from '../utils/constants';
+import { MESSAGE_CHAR_LIMIT } from '../utils/constants';
 import { formatRelativeTime } from '../utils/formatters';
 import { cn, copyToClipboard } from '../lib/utils';
 import toast from 'react-hot-toast';
@@ -33,6 +34,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const Chat = () => {
   const { user } = useAuth();
+  const { models } = useModels();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,35 +56,43 @@ const Chat = () => {
     scrollToBottom();
   }, [messages]);
 
-  const loadInitialData = async () => {
-    try {
-      // Load private mode status
-      const privateModeStatus = await userApi.getPrivateModeStatus();
-      setPrivateMode(privateModeStatus.private_mode);
+const loadInitialData = async () => {
+  try {
+    // Load private mode status
+    const privateModeStatus = await userApi.getPrivateModeStatus();
+    setPrivateMode(privateModeStatus.private_mode);
 
-      // Load user settings
-      const settings = await userApi.getPreferences();
-      if (settings?.memory_enabled !== undefined) {
-        setMemoryEnabled(settings.memory_enabled);
-      }
-      if (settings?.default_model) {
-        setSelectedModel(settings.default_model);
-      }
+    // ✅ FIXED: Load user settings with correct structure
+    const settings = await userApi.getSettings();
 
-      // Load chat history if not in private mode
-      if (!privateModeStatus.private_mode) {
-        const history = await chatApi.getChatHistory(0, 20);
-        setChatHistory(history.chats || []);
-        
-        // Load last conversation if exists
-        if (history.chats?.length > 0 && history.chats[0].messages) {
-          setMessages(history.chats[0].messages);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load initial data:', error);
+    // Access nested memory settings
+    if (settings?.memory?.enabled !== undefined) {
+      setMemoryEnabled(settings.memory.enabled);
     }
-  };
+
+    // Access nested model settings
+    if (settings?.models?.default_model) {
+      setSelectedModel(settings.models.default_model);
+    }
+
+    // Load chat history if not in private mode
+    if (!privateModeStatus.private_mode) {
+      const memory = await userApi.getMemory();
+      if (memory.chat_history && memory.chat_history.length > 0) {
+        // Convert chat_history array to messages format
+        setMessages(memory.chat_history.map((item, index) => ({
+          id: index,
+          role: item.role || 'user',
+          content: item.prompt || item.response || item.content,
+          timestamp: item.timestamp || new Date().toISOString(),
+        })));
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load initial data:', error);
+    toast.error('Failed to load chat settings');
+  }
+};
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -278,7 +288,7 @@ const Chat = () => {
     );
   };
 
-  const modelInfo = Object.values(AI_MODELS).find(m => m.id === selectedModel);
+  const modelInfo = Object.values(models).find(m => m.id === selectedModel);
 
   return (
     <div className="flex h-[calc(100vh-10rem)]">
@@ -336,11 +346,14 @@ const Chat = () => {
                 </label>
 
                 {privateMode && (
-                  <div className="p-2 bg-yellow-500/20 rounded-lg">
-                    <div className="flex items-center text-yellow-400 text-sm">
+                  <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-400 text-sm">
+                    <div className="flex items-center font-medium">
                       <EyeOff className="w-4 h-4 mr-2" />
                       Private Mode Active
                     </div>
+                    <p className="text-xs text-yellow-500 mt-1">
+                      This mode is for the current session and will reset on page reload.
+                    </p>
                   </div>
                 )}
               </div>
@@ -488,7 +501,7 @@ const Chat = () => {
                           <span>{formatRelativeTime(message.timestamp)}</span>
                           {message.model && (
                             <span className="text-primary-400">
-                              {Object.values(AI_MODELS).find(m => m.id === message.model)?.name || message.model}
+                              {Object.values(models).find(m => m.id === message.model)?.name || message.model}
                             </span>
                           )}
                           {message.private_mode && (
@@ -538,7 +551,7 @@ const Chat = () => {
           <div className="mb-3 flex items-center space-x-2">
             <label className="text-sm text-gray-400">Model:</label>
             <div className="flex space-x-2">
-              {Object.values(AI_MODELS).map((model) => (
+              {Object.values(models).map((model) => (
                 <button
                   key={model.id}
                   onClick={() => setSelectedModel(model.id)}
