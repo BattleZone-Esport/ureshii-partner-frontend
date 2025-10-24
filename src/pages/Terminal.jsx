@@ -1,7 +1,32 @@
-import React from 'react';
-import { AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { AlertCircle, ChevronRight } from 'lucide-react';
 
 const Terminal = () => {
+  const [input, setInput] = useState('');
+  const [history, setHistory] = useState([]);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+  };
+
+  const handleInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (input.trim()) {
+        const newHistory = [...history, { type: 'command', content: input }];
+        // Mock AI response
+        newHistory.push({ type: 'response', content: `AI processing: "${input}"... Functionality coming soon.` });
+        setHistory(newHistory);
+        setInput('');
+      }
+    }
+  };
+
   return (
     <div className="text-white">
       <div className="bg-yellow-500/20 border border-yellow-500/30 p-4 rounded-lg mb-4">
@@ -16,8 +41,39 @@ const Terminal = () => {
           </div>
         </div>
       </div>
-      <h1 className="text-2xl font-bold mb-4">Terminal</h1>
-      <p className="text-gray-400">Terminal functionality coming soon...</p>
+
+      <div
+        className="bg-surface-elevated font-mono text-sm rounded-lg p-4 h-96 overflow-y-auto"
+        onClick={() => inputRef.current?.focus()}
+      >
+        <div>
+          {history.map((item, index) => (
+            <div key={index} className="mb-2">
+              {item.type === 'command' ? (
+                <div className="flex items-center">
+                  <ChevronRight className="w-4 h-4 text-primary-400" />
+                  <span className="text-gray-300">{item.content}</span>
+                </div>
+              ) : (
+                <div className="text-gray-400 whitespace-pre-wrap">{item.content}</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center">
+          <ChevronRight className="w-4 h-4 text-primary-400" />
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleInputKeyDown}
+            className="bg-transparent border-none text-gray-300 focus:outline-none w-full"
+            placeholder="Describe what you want to do..."
+          />
+        </div>
+      </div>
     </div>
   );
 };
