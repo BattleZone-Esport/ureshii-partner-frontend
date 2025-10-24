@@ -23,7 +23,7 @@ A modern, mobile-first React frontend for **URESHII Partner** - an AI-powered co
 - ✅ Landing Page - Complete with all sections
 - ✅ Dashboard - Complete with stats and recent jobs
 - ✅ Layout System - Navbar, Sidebar, Mobile Navigation
-- ✅ Chat Interface - Complete with message history, model selection, and private mode
+- 🚧 Chat Interface - Placeholder (ready for implementation)
 - 🚧 Jobs/Projects - Placeholder (ready for implementation)  
 - 🚧 Terminal - Placeholder with warning banner
 - 🚧 Settings - Placeholder (ready for implementation)
